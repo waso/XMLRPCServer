@@ -24,10 +24,29 @@ class xmlrpc_registers:
     
     def total_news(self):
         session = Session()
-        cnt = session.query(News).count()
+        cnt = session.query(News.id).count()
         session.commit()
         session.close()
         return 'Total number of news: ' + str(cnt)
+    
+    def total_news_by_text(self, text_to_find):
+        session = Session()
+        count = 0
+        count = session.query(News).join(Author, Author.id==News.author_id).filter(News.text.like('%' + text_to_find + '%')).count()
+        session.commit()
+        session.close()
+        return count
+    
+    def print_news_by_text(self, text_to_find):
+        session = Session()
+        count = 0
+        res = ''
+        for n, a in session.query(News, Author).filter(News.author_id == Author.id).filter(News.text.like('%' + text_to_find + '%')).all():
+            count = count + 1
+            res = res + str(n.id) + ', title: ' + n.title + ' author: ' + a.name + ' ' + a.email + '\n'
+        session.commit()
+        session.close()
+        return res
     
     def add_news(self, title, author_id, text):
         session = Session()
